@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>民泊クイズ｜あなたは民泊制度マスター？</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Yomogi&family=M+PLUS+Rounded+1c:wght@500;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --main-pink: #f4a3b3;
@@ -380,8 +383,19 @@ function scoreQuiz() {
 }
 
 // ---- Canvasに認定証を描画 ----
-function drawCertificate(score, name, callback) {
+const NAME_FONT_FAMILY = '"M PLUS Rounded 1c", sans-serif';
+
+async function drawCertificate(score, name, callback) {
   const level = getLevel(score);
+
+  // 可愛いフォントの読み込みを待ってから描画する（未読込だと既定フォントで幅がズレるため）
+  try {
+    await Promise.all([
+      document.fonts.load(`700 72px ${NAME_FONT_FAMILY}`),
+      document.fonts.load(`500 40px ${NAME_FONT_FAMILY}`)
+    ]);
+  } catch (e) { /* フォント取得に失敗しても既定フォントで続行 */ }
+
   const img = new Image();
   img.onload = function () {
     const canvas = document.getElementById("certCanvas");
@@ -390,45 +404,45 @@ function drawCertificate(score, name, callback) {
     const ctx = canvas.getContext("2d");
     ctx.drawImage(img, 0, 0);
 
-    // 名前を入れる欄（イラストにあらかじめ用意された、肉球アイコン付きの枠）
-    const areaX = img.width * 0.59;      // 肉球アイコンの右側から
-    const areaRight = img.width * 0.963; // 枠の右端の手前まで
+    // 名前を入れる欄（イラストにあらかじめ用意された、肉球アイコン付きの枠）全体の中央に配置する
+    const areaX = img.width * 0.482;
+    const areaRight = img.width * 0.963;
     const areaCenterY = img.height * 0.612;
     const areaW = areaRight - areaX;
 
     const displayName = (name && name.trim()) ? name.trim() : "あなた";
     const suffix = " 殿";
-    const fontFamily = '"Hiragino Maru Gothic ProN", "Yu Gothic", sans-serif';
+    const fontFamily = NAME_FONT_FAMILY;
 
     let nameFontSize = 72;
-    let suffixFontSize = Math.round(nameFontSize * 0.5);
+    let suffixFontSize = Math.round(nameFontSize * 0.55);
 
     function measureTotal() {
-      ctx.font = `bold ${nameFontSize}px ${fontFamily}`;
+      ctx.font = `700 ${nameFontSize}px ${fontFamily}`;
       const nameW = ctx.measureText(displayName).width;
-      ctx.font = `bold ${suffixFontSize}px ${fontFamily}`;
+      ctx.font = `500 ${suffixFontSize}px ${fontFamily}`;
       const suffixW = ctx.measureText(suffix).width;
       return nameW + suffixW;
     }
 
-    suffixFontSize = Math.round(nameFontSize * 0.5);
-    while (measureTotal() > areaW - 20 && nameFontSize > 24) {
+    suffixFontSize = Math.round(nameFontSize * 0.55);
+    while (measureTotal() > areaW - 40 && nameFontSize > 24) {
       nameFontSize -= 2;
-      suffixFontSize = Math.round(nameFontSize * 0.5);
+      suffixFontSize = Math.round(nameFontSize * 0.55);
     }
 
     const totalW = measureTotal();
     let drawX = areaX + (areaW - totalW) / 2;
 
-    ctx.fillStyle = "#4a3728";
+    ctx.fillStyle = "#8a7768"; // 濃すぎない、やわらかい色合いに
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
 
-    ctx.font = `bold ${nameFontSize}px ${fontFamily}`;
+    ctx.font = `700 ${nameFontSize}px ${fontFamily}`;
     ctx.fillText(displayName, drawX, areaCenterY);
     drawX += ctx.measureText(displayName).width;
 
-    ctx.font = `bold ${suffixFontSize}px ${fontFamily}`;
+    ctx.font = `500 ${suffixFontSize}px ${fontFamily}`;
     ctx.fillText(suffix, drawX, areaCenterY + (nameFontSize - suffixFontSize) * 0.18);
 
     callback(canvas);
