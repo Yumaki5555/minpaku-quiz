@@ -205,8 +205,8 @@
   <div id="screen-start" class="screen active">
     <div class="card">
       <label class="field-label" for="userName">認定証に表示するお名前・ニックネーム</label>
-      <input type="text" id="userName" maxlength="20" placeholder="例）たろう">
-      <p class="hint">あとで結果画面に表示されます（未入力の場合は「あなた」と表示されます）</p>
+      <input type="text" id="userName" maxlength="8" placeholder="例）たろう">
+      <p class="hint">あとで結果画面に表示されます（未入力の場合は「あなた」と表示されます／最大8文字）</p>
     </div>
     <button class="btn-primary" id="btnStart">クイズをはじめる</button>
   </div>
@@ -296,11 +296,12 @@ const QUIZ = [
 ];
 
 // ---- 点数帯ごとの設定 ----
+// nameCenterY はイラストごとに名前欄の縦位置が微妙に異なるため個別に調整（画像の高さに対する比率）
 const RESULT_LEVELS = [
-  { min: 0, max: 4, img: () => IMG_0_4, title: "民泊制度ビギナー" },
-  { min: 5, max: 7, img: () => IMG_5_7, title: "民泊制度勉強家" },
-  { min: 8, max: 9, img: () => IMG_8_9, title: "民泊制度上級者" },
-  { min: 10, max: 10, img: () => IMG_10, title: "民泊制度博士" }
+  { min: 0, max: 4, img: () => IMG_0_4, title: "民泊制度ビギナー", nameCenterY: 0.591 },
+  { min: 5, max: 7, img: () => IMG_5_7, title: "民泊制度勉強家", nameCenterY: 0.577 },
+  { min: 8, max: 9, img: () => IMG_8_9, title: "民泊制度上級者", nameCenterY: 0.612 },
+  { min: 10, max: 10, img: () => IMG_10, title: "民泊制度博士", nameCenterY: 0.611 }
 ];
 
 function getLevel(score) {
@@ -407,7 +408,7 @@ async function drawCertificate(score, name, callback) {
     // 名前を入れる欄（イラストにあらかじめ用意された、肉球アイコン付きの枠）全体の中央に配置する
     const areaX = img.width * 0.482;
     const areaRight = img.width * 0.963;
-    const areaCenterY = img.height * 0.612;
+    const areaCenterY = img.height * level.nameCenterY;
     const areaW = areaRight - areaX;
 
     const displayName = (name && name.trim()) ? name.trim() : "あなた";
@@ -433,17 +434,19 @@ async function drawCertificate(score, name, callback) {
 
     const totalW = measureTotal();
     let drawX = areaX + (areaW - totalW) / 2;
+    // 文字の下端（ベースライン）をnameとsuffixで揃えるため、共通のベースラインYを使う
+    const baselineY = areaCenterY + nameFontSize * 0.36;
 
     ctx.fillStyle = "#8a7768"; // 濃すぎない、やわらかい色合いに
     ctx.textAlign = "left";
-    ctx.textBaseline = "middle";
+    ctx.textBaseline = "alphabetic";
 
     ctx.font = `700 ${nameFontSize}px ${fontFamily}`;
-    ctx.fillText(displayName, drawX, areaCenterY);
+    ctx.fillText(displayName, drawX, baselineY);
     drawX += ctx.measureText(displayName).width;
 
     ctx.font = `500 ${suffixFontSize}px ${fontFamily}`;
-    ctx.fillText(suffix, drawX, areaCenterY + (nameFontSize - suffixFontSize) * 0.18);
+    ctx.fillText(suffix, drawX, baselineY);
 
     callback(canvas);
   };
