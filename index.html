@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>民泊クイズ｜あなたは民泊制度マスター？</title>
+<style>
+  :root {
+    --main-pink: #f4a3b3;
+    --main-gold: #e0a84e;
+    --bg: #fdf6ec;
+    --text: #4a3728;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    background: linear-gradient(180deg, #fff8ee, #fdeee0);
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    padding: 24px 12px 60px;
+  }
+  .app {
+    width: 100%;
+    max-width: 720px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 1.6rem;
+    line-height: 1.4;
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #8a7362;
+    margin-bottom: 24px;
+    font-size: 0.95rem;
+  }
+  .card {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    padding: 28px 24px;
+    margin-bottom: 20px;
+  }
+  label.field-label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+  input[type="text"] {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 1rem;
+    border: 2px solid #eadfce;
+    border-radius: 12px;
+    outline: none;
+  }
+  input[type="text"]:focus { border-color: var(--main-gold); }
+  .hint {
+    font-size: 0.85rem;
+    color: #a08d7c;
+    margin-top: 6px;
+  }
+  button {
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    border-radius: 999px;
+    font-size: 1.05rem;
+    font-weight: bold;
+    padding: 14px 20px;
+    width: 100%;
+    transition: transform 0.1s ease, opacity 0.2s ease;
+  }
+  button:active { transform: scale(0.98); }
+  button:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-primary {
+    background: linear-gradient(135deg, #f7b8c4, #f2909f);
+    color: #fff;
+  }
+  .btn-secondary {
+    background: #fff;
+    border: 2px solid var(--main-gold);
+    color: var(--main-gold);
+    margin-top: 10px;
+  }
+  .btn-download {
+    background: linear-gradient(135deg, #7fc9a8, #5bb98c);
+    color: #fff;
+    margin-top: 14px;
+  }
+  .btn-share {
+    background: #111;
+    color: #fff;
+    margin-top: 10px;
+  }
+  .question {
+    margin-bottom: 26px;
+    padding-bottom: 22px;
+    border-bottom: 1px dashed #eee0cd;
+  }
+  .question:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .q-num {
+    display: inline-block;
+    background: var(--main-gold);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: bold;
+    padding: 3px 10px;
+    border-radius: 999px;
+    margin-bottom: 8px;
+  }
+  .q-text {
+    font-weight: bold;
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
+  .choices { display: flex; flex-direction: column; gap: 8px; }
+  .choice {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 2px solid #eee0cd;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+  .choice:hover { border-color: #f2c9d1; }
+  .choice.selected {
+    border-color: var(--main-pink);
+    background: #fff2f5;
+  }
+  .choice input { accent-color: var(--main-pink); width: 18px; height: 18px; flex-shrink: 0; }
+  .choice span { line-height: 1.4; }
+  .progress-bar-wrap {
+    background: #f1e6d5;
+    border-radius: 999px;
+    height: 10px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #f7b8c4, var(--main-gold));
+    width: 0%;
+    transition: width 0.2s ease;
+  }
+  .warn {
+    color: #c0466a;
+    font-size: 0.9rem;
+    margin-top: 10px;
+    text-align: center;
+    display: none;
+  }
+  .result-score {
+    text-align: center;
+    font-size: 1.1rem;
+    margin-bottom: 16px;
+  }
+  .result-score .big {
+    font-size: 2.4rem;
+    font-weight: bold;
+    color: var(--main-pink);
+  }
+  canvas#certCanvas {
+    width: 100%;
+    height: auto;
+    border-radius: 14px;
+    display: block;
+    margin: 0 auto;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  footer {
+    text-align: center;
+    color: #b3a08e;
+    font-size: 0.8rem;
+    margin-top: 20px;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>🏠 民泊クイズ<br>あなたは民泊制度マスター？</h1>
+  <p class="subtitle">全10問。あなたの民泊知識レベルに応じて、名前入りの認定証イラストをプレゼント！</p>
+
+  <!-- スタート画面 -->
+  <div id="screen-start" class="screen active">
+    <div class="card">
+      <label class="field-label" for="userName">認定証に表示するお名前・ニックネーム</label>
+      <input type="text" id="userName" maxlength="20" placeholder="例）たろう">
+      <p class="hint">あとで結果画面に表示されます（未入力の場合は「あなた」と表示されます）</p>
+    </div>
+    <button class="btn-primary" id="btnStart">クイズをはじめる</button>
+  </div>
+
+  <!-- クイズ画面 -->
+  <div id="screen-quiz" class="screen">
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill"></div></div>
+    <div class="card" id="questionsContainer"></div>
+    <p class="warn" id="warnMsg">すべての質問に回答してください。</p>
+    <button class="btn-primary" id="btnSubmit">採点する</button>
+  </div>
+
+  <!-- 結果画面 -->
+  <div id="screen-result" class="screen">
+    <div class="card">
+      <div class="result-score">
+        <span id="userNameDisplay"></span>さんの結果：<span class="big" id="scoreText">0</span> / 10点
+      </div>
+      <canvas id="certCanvas"></canvas>
+      <button class="btn-download" id="btnDownload">認定証イラストをダウンロード</button>
+      <button class="btn-share" id="btnShare">Xでシェアする</button>
+      <button class="btn-secondary" id="btnRetry">もう一度挑戦する</button>
+    </div>
+  </div>
+
+  <footer>#民泊クイズ ｜ 民泊制度について、みんなで正しく知ろう</footer>
+</div>
+
+<script src="assets/images.js"></script>
+<script>
+// ---- クイズデータ ----
+const QUIZ = [
+  {
+    q: "民泊を合法的に営業する方法は、日本には主に何種類あるでしょう？",
+    choices: ["1種類", "2種類", "3種類（届出／許可／認定）", "5種類"],
+    answer: 2
+  },
+  {
+    q: "住宅宿泊事業法（いわゆる「民泊新法」）に基づいて民泊を営業する場合、1年間に営業できる日数の上限は？",
+    choices: ["90日", "120日", "180日", "上限なし"],
+    answer: 2
+  },
+  {
+    q: "合法的に営業している民泊施設に、外から見てわかるように必ず掲示しなければならないものは？",
+    choices: ["宿泊料金表", "届出番号などが書かれた標識", "避難経路図のみ", "特に義務はない"],
+    answer: 1
+  },
+  {
+    q: "家主が同じ建物に住んでいない「家主不在型」の民泊では、近隣からの苦情や問い合わせに対応する義務は誰にある？",
+    choices: ["宿泊者本人", "近隣住民", "住宅宿泊管理業者など運営側の責任者", "警察"],
+    answer: 2
+  },
+  {
+    q: "近所で「これは違法な民泊では？」と疑わしい施設を見つけたとき、まず確認すべき行動として適切なのは？",
+    choices: ["直接乗り込んで注意する", "届出番号の標識があるか確認し、なければ自治体や観光庁の窓口に相談する", "何もしない", "SNSで施設や個人名を晒す"],
+    answer: 1
+  },
+  {
+    q: "都道府県や市区町村は、条例によって住宅宿泊事業の営業日数や区域をさらに制限することができる。これは正しい？",
+    choices: ["正しい（地域の実情に応じて上乗せ規制ができる）", "誤り（国のルール以外は一切認められない）"],
+    answer: 0
+  },
+  {
+    q: "民泊新法において、家主が同じ建物内に住まず管理を委託している形態を何という？",
+    choices: ["家主居住型", "家主不在型", "簡易宿所型", "特区型"],
+    answer: 1
+  },
+  {
+    q: "無届出・無許可で民泊営業を行った場合、どうなる可能性がある？",
+    choices: ["特に罰則はなく注意で済む", "罰金などの罰則の対象になり得る", "逆に届出が免除される", "自動的に旅館業許可に切り替わる"],
+    answer: 1
+  },
+  {
+    q: "民泊施設が火災などの際に宿泊者の安全を守るために備えるべきとされているものは？",
+    choices: ["消火器や誘導灯など消防法令に適合した設備", "特に設備義務はない", "宿泊者が各自用意する", "近隣住民が用意する"],
+    answer: 0
+  },
+  {
+    q: "民泊トラブル（騒音・ゴミ出しマナーなど）が発生したとき、住民として頼れる相談窓口としてふさわしいのは？",
+    choices: ["個人で解決するしかない", "自治体の民泊相談窓口や観光庁の窓口", "全国ネットのニュース番組", "他の宿泊予約サイト"],
+    answer: 1
+  }
+];
+
+// ---- 点数帯ごとの設定 ----
+const RESULT_LEVELS = [
+  { min: 0, max: 4, img: () => IMG_0_4, title: "民泊制度ビギナー" },
+  { min: 5, max: 7, img: () => IMG_5_7, title: "民泊制度勉強家" },
+  { min: 8, max: 9, img: () => IMG_8_9, title: "民泊制度上級者" },
+  { min: 10, max: 10, img: () => IMG_10, title: "民泊制度博士" }
+];
+
+function getLevel(score) {
+  return RESULT_LEVELS.find(l => score >= l.min && score <= l.max);
+}
+
+// ---- 状態 ----
+const answers = new Array(QUIZ.length).fill(null);
+let userName = "";
+
+// ---- 画面切り替え ----
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// ---- クイズ画面の描画 ----
+function renderQuestions() {
+  const container = document.getElementById("questionsContainer");
+  container.innerHTML = "";
+  QUIZ.forEach((item, qi) => {
+    const qDiv = document.createElement("div");
+    qDiv.className = "question";
+    const num = document.createElement("div");
+    num.className = "q-num";
+    num.textContent = `Q${qi + 1} / ${QUIZ.length}`;
+    const qText = document.createElement("div");
+    qText.className = "q-text";
+    qText.textContent = item.q;
+    const choicesDiv = document.createElement("div");
+    choicesDiv.className = "choices";
+
+    item.choices.forEach((choiceText, ci) => {
+      const label = document.createElement("label");
+      label.className = "choice";
+      label.dataset.qi = qi;
+      label.dataset.ci = ci;
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = `q${qi}`;
+      input.value = ci;
+      input.addEventListener("change", () => {
+        answers[qi] = ci;
+        choicesDiv.querySelectorAll(".choice").forEach(c => c.classList.remove("selected"));
+        label.classList.add("selected");
+        updateProgress();
+      });
+      const span = document.createElement("span");
+      span.textContent = choiceText;
+      label.appendChild(input);
+      label.appendChild(span);
+      choicesDiv.appendChild(label);
+    });
+
+    qDiv.appendChild(num);
+    qDiv.appendChild(qText);
+    qDiv.appendChild(choicesDiv);
+    container.appendChild(qDiv);
+  });
+}
+
+function updateProgress() {
+  const answered = answers.filter(a => a !== null).length;
+  const pct = Math.round((answered / QUIZ.length) * 100);
+  document.getElementById("progressFill").style.width = pct + "%";
+}
+
+// ---- 採点 ----
+function scoreQuiz() {
+  let score = 0;
+  QUIZ.forEach((item, qi) => {
+    if (answers[qi] === item.answer) score++;
+  });
+  return score;
+}
+
+// ---- Canvasに認定証を描画 ----
+function drawCertificate(score, name, callback) {
+  const level = getLevel(score);
+  const img = new Image();
+  img.onload = function () {
+    const canvas = document.getElementById("certCanvas");
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0);
+
+    // 名前を入れる帯（右側コメント文の下の余白エリア）
+    const boxX = img.width * 0.505;
+    const boxY = img.height * 0.596;
+    const boxW = img.width * 0.46;
+    const boxH = img.height * 0.07;
+    const radius = 16;
+
+    ctx.save();
+    ctx.globalAlpha = 0.85;
+    ctx.fillStyle = "#ffffff";
+    roundRect(ctx, boxX, boxY, boxW, boxH, radius);
+    ctx.fill();
+    ctx.restore();
+
+    const displayName = (name && name.trim()) ? name.trim() : "あなた";
+    let fontSize = 34;
+    ctx.font = `bold ${fontSize}px "Hiragino Maru Gothic ProN", "Yu Gothic", sans-serif`;
+    const label = `${displayName} さん`;
+    while (ctx.measureText(label).width > boxW - 24 && fontSize > 16) {
+      fontSize -= 2;
+      ctx.font = `bold ${fontSize}px "Hiragino Maru Gothic ProN", "Yu Gothic", sans-serif`;
+    }
+    ctx.fillStyle = "#4a3728";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(label, boxX + boxW / 2, boxY + boxH / 2 + 2);
+
+    callback(canvas);
+  };
+  img.src = level.img();
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+// ---- イベント ----
+document.getElementById("btnStart").addEventListener("click", () => {
+  userName = document.getElementById("userName").value;
+  renderQuestions();
+  updateProgress();
+  showScreen("screen-quiz");
+});
+
+document.getElementById("btnSubmit").addEventListener("click", () => {
+  if (answers.includes(null)) {
+    document.getElementById("warnMsg").style.display = "block";
+    const firstUnanswered = answers.findIndex(a => a === null);
+    const qDivs = document.querySelectorAll(".question");
+    qDivs[firstUnanswered].scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+  document.getElementById("warnMsg").style.display = "none";
+
+  const score = scoreQuiz();
+  const level = getLevel(score);
+  document.getElementById("scoreText").textContent = score;
+  document.getElementById("userNameDisplay").textContent = (userName && userName.trim()) ? userName.trim() : "あなた";
+
+  drawCertificate(score, userName, () => {
+    showScreen("screen-result");
+
+    document.getElementById("btnShare").onclick = () => {
+      const text = `民泊クイズで10点満点中${score}点（${level.title}）でした！ #民泊クイズ`;
+      const url = location.href.split("#")[0];
+      const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+      window.open(shareUrl, "_blank");
+    };
+  });
+});
+
+document.getElementById("btnDownload").addEventListener("click", () => {
+  const canvas = document.getElementById("certCanvas");
+  const link = document.createElement("a");
+  link.download = "民泊クイズ認定証.png";
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+});
+
+document.getElementById("btnRetry").addEventListener("click", () => {
+  answers.fill(null);
+  document.getElementById("userName").value = "";
+  showScreen("screen-start");
+});
+</script>
+</body>
+</html>
