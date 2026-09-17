@@ -350,7 +350,8 @@ function renderQuestions() {
         updateProgress();
       });
       const span = document.createElement("span");
-      span.textContent = choiceText;
+      const letter = String.fromCharCode(65 + ci); // A, B, C, D
+      span.textContent = `${letter}. ${choiceText}`;
       label.appendChild(input);
       label.appendChild(span);
       choicesDiv.appendChild(label);
